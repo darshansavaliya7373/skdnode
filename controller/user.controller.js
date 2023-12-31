@@ -105,6 +105,7 @@ exports.singlecoilupdate = async (req, res) => {
                     "data.$[element].meter": req.body.meter,
                     "data.$[element].weight": req.body.weight,
                     "data.$[element].remark": req.body.remark,
+                    "data.$[element].palateno": req.body.palateno,
                 },
             },
             {
