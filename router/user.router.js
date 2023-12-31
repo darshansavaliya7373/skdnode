@@ -10,7 +10,11 @@ const{
     allcoil,
     updatepalate,
     emptypalateno,
-    deleteSingleCoil
+    deleteSingleCoil,
+    operatorwithcoil,
+    filterCoilData,
+
+
 }=require('../controller/user.controller.js')
 
 router.post('/login',login)
@@ -22,4 +26,6 @@ router.get('/allcoil',allcoil)
 router.post('/updatepalate',updatepalate)
 router.get('/emptypalateno',emptypalateno)
 router.delete('/deletesinglecoil/:id',deleteSingleCoil)
+router.get('/operatorwithcoil',operatorwithcoil)
+router.post('/filterCoilData',filterCoilData)
 module.exports = router
