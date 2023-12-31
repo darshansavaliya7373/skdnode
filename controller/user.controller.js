@@ -95,7 +95,7 @@ exports.coilenter = async (req, res) => {
 exports.singlecoilupdate = async (req, res) => {
     try {
         const coilIdToUpdate = req.params.id; // The _id of the element in the data array
-
+        console.log(req.body,req.params);
         const data = await coilModel.findByIdAndUpdate(
             req.params.coil, // Use the main document _id here
             {
