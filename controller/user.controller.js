@@ -66,12 +66,14 @@ exports.coilenter = async (req, res) => {
             return res.status(404).json({ message: "some field is empty" });
 
         } else {
-            var data = await coilModel.findById(req.params.id);
-            var coilno = data.data.slice(-1);
-            if (coilno.length == 0) {
-                req.body.coilno = 1;
+            const allCoilData = await coilModel.find({});
+            const allDataArrays = allCoilData.map((coil) => coil.data);
+            const flattenedDataArray = allDataArrays.flat();
+            console.log(flattenedDataArray)
+            if (flattenedDataArray.length == 0) {
+                req.body.coilno = 1
             } else {
-                req.body.coilno = parseInt(coilno[0].coilno) + 1;
+                req.body.coilno = parseInt(flattenedDataArray.slice(-1)[0].coilno) + 1
             }
             req.body.date = new Date().toLocaleDateString()
             req.body.mainid = req.params.id
@@ -95,7 +97,7 @@ exports.coilenter = async (req, res) => {
 exports.singlecoilupdate = async (req, res) => {
     try {
         const coilIdToUpdate = req.params.id; // The _id of the element in the data array
-        console.log(req.body,req.params);
+        console.log(req.body, req.params);
         const data = await coilModel.findByIdAndUpdate(
             req.params.coil, // Use the main document _id here
             {
@@ -127,6 +129,7 @@ exports.singlecoilupdate = async (req, res) => {
 // coil data to enter for today
 exports.todayaddcoil = async (req, res) => {
     var date = new Date().toLocaleDateString();
+    console.log(date);
     var data = await coilModel.find({ date });
     console.log(data);
     if (data.length > 0) {
