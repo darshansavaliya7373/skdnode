@@ -227,18 +227,13 @@ exports.operatorwithcoil = async (req, res) => {
     }
 
 }
-
+// chalan creating
 exports.chalan = async (req, res) => {
 
     console.log(req.body);
     if (empty(req.body)) {
         return res.status(404).json({ message: "some field is empty" })
     }
-    // const allCoilData = await coilModel.find({});
-    // const allDataArrays = allCoilData.map((coil) => coil.data);
-    // const flattenedDataArray = allDataArrays.flat();
-    // const filteredData = flattenedDataArray.filter(item =>req.body.coilstomakechalan.includes(item.id));
-    // console.log(filteredData);
     var data = await chalanModel.create({ coilsid: req.body.coilstomakechalan })
     if (data) {
         for (const id of req.body.coilstomakechalan) {
@@ -253,42 +248,170 @@ exports.chalan = async (req, res) => {
     }
 }
 
-// fiter of data
-exports.filterCoilData = async (req, res) => {
+const ObjectId = require('mongoose').Types.ObjectId;
+
+exports.allchalans = async (req, res) => {
     try {
-        const { mm, meter, weight, lessthanmeter, greaterthanmeter } = req.body;
+        const allCoilData = await coilModel.find({});
+        const allDataArrays = allCoilData.map((coil) => coil.data);
+        const flattenedDataArray = allDataArrays.flat();
+        const allchalans = await chalanModel.find({});
+        const chalansWithCoilData = allchalans.map((chalan) => {
+            const updatedCoilsid = chalan.coilsid.map((coilsid) => {
+                const matchingCoil = flattenedDataArray.find((coil) => coil._id.equals(coilsid));
+                return matchingCoil || coilsid; // Use existing coilsid if not found
+            });
 
-        const filterConditions = {};
+            return {
+                ...chalan.toObject(), // Convert Mongoose Document to plain object
+                coilsid: updatedCoilsid,
+            };
+        });
 
-        if (mm) {
-            filterConditions['data.mm'] = mm;
-        }
+        // console.log(chalansWithCoilData);
 
-        if (meter) {
-            filterConditions['data.meter'] = meter;
-        }
-
-        if (weight) {
-            filterConditions['data.weight'] = weight;
-        }
-
-        if (lessthanmeter !== undefined) {
-            filterConditions['data.meter'] = { $lte: lessthanmeter };
-        }
-
-        if (greaterthanmeter !== undefined) {
-            filterConditions['data.meter'] = { $gte: greaterthanmeter };
-        }
-
-        const filteredCoilData = await coilModel.find(filterConditions);
-
-        if (filteredCoilData.length > 0) {
-            res.status(200).json({ message: "Filtered data retrieved successfully", data: filteredCoilData });
-        } else {
-            res.status(404).json({ message: "No matching documents found" });
-        }
+        res.status(200).json(chalansWithCoilData);
     } catch (error) {
-        console.error("Error:", error);
-        res.status(500).json({ message: "Internal server error", error: error.message });
+        console.error('Error fetching data:', error);
+        res.status(500).send('Internal Server Error');
     }
 };
+
+
+exports.generateBill = async (req, res) => {
+    try {
+        const allCoilData = await coilModel.find({});
+        const allDataArrays = allCoilData.map((coil) => coil.data);
+        const flattenedDataArray = allDataArrays.flat();
+        const allchalans = await chalanModel.find({});
+        const chalansWithCoilData = allchalans.map((chalan) => {
+            const updatedCoilsid = chalan.coilsid.map((coilsid) => {
+                const matchingCoil = flattenedDataArray.find((coil) => coil._id.equals(coilsid));
+                return matchingCoil || coilsid; // Use existing coilsid if not found
+            });
+
+            return {
+                ...chalan.toObject(), // Convert Mongoose Document to a plain object
+                coilsid: updatedCoilsid,
+            };
+        });
+
+        const chalanId = req.params.id;
+        const chalan = chalansWithCoilData.find((c) => c._id.equals(chalanId));
+
+        if (!chalan) {
+            return res.status(404).send('Chalan not found');
+        }
+
+        const today = new Date();
+
+        const groupedCoils = groupCoils(chalan.coilsid);
+        const totalMeter = calculateTotalMeter(flattenedDataArray);
+        const totalCoils = flattenedDataArray.length;
+        function simplifyCoilRange(coilRange) {
+            const coils = coilRange.split(' to ').map(Number);
+            
+            if (coils.length < 2) {
+                return coilRange; // Not a valid range
+            }
+        
+            const sortedCoils = [...coils].sort((a, b) => a - b);
+            const minCoil = sortedCoils[0];
+            const maxCoil = sortedCoils[sortedCoils.length - 1];
+        
+            return minCoil === maxCoil ? minCoil.toString() : `${minCoil} to ${maxCoil}`;
+        }
+        
+        // Example usage:
+        const simplifiedRange = simplifyCoilRange('313 to 314 to 315 to 316');
+        console.log(simplifiedRange); // Output: "4 to 16"
+        
+        const billHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Bill</title>
+          <style>
+            table {
+              font-family: Arial, sans-serif;
+              border-collapse: collapse;
+              width: 100%;
+            }
+  
+            th, td {
+              border: 1px solid #dddddd;
+              text-align: left;
+              padding: 8px;
+            }
+  
+            tr:nth-child(even) {
+              background-color: #f2f2f2;
+            }
+          </style>
+        </head>
+        <body>
+          <h2>Bill - ${today.toISOString()}</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Coil No</th>
+                <th>Meter</th>
+                <th>Total Coil</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${groupedCoils.map((group) => `
+                <tr>
+                  <td>${simplifyCoilRange(group.coilRange)}</td>
+                  <td>${calculateTotalMeter(group.coils)}</td> 
+                  <td>${group.coils.length}</td>
+                </tr>
+              `).join('')}
+
+              <tr>
+              <td>Total</td>
+              <td>${totalMeter}</td>
+              <td>${totalCoils}</td>
+            </tr>
+            </tbody>
+          </table>
+        </body>
+        </html>
+      `;
+
+        res.status(200).send(billHtml);
+    } catch (error) {
+        console.error('Error generating bill:', error);
+        res.status(500).send('Internal Server Error');
+    }
+    function groupCoils(coils) {
+        const groupedCoils = [];
+        let currentGroup = { coilRange: '', coils: [] };
+    
+        for (const coil of coils) {
+            if (currentGroup.coils.length === 0) {
+                currentGroup.coils.push(coil);
+                currentGroup.coilRange = coil.coilno.toString();
+            } else {
+                const lastCoil = currentGroup.coils[currentGroup.coils.length - 1];
+                if (coil.coilno - lastCoil.coilno === 1) {
+                    currentGroup.coils.push(coil);
+                    currentGroup.coilRange = `${currentGroup.coilRange} to ${coil.coilno}`;
+                } else {
+                    groupedCoils.push(currentGroup);
+                    currentGroup = { coilRange: coil.coilno.toString(), coils: [coil] };
+                }
+            }
+        }
+    
+        if (currentGroup.coils.length > 0) {
+            groupedCoils.push(currentGroup);
+        }
+    
+        return groupedCoils;
+    }
+    
+    function calculateTotalMeter(coils) {
+        return coils.reduce((total, coil) => total + parseFloat(coil.meter), 0);
+    }
+}
