@@ -49,8 +49,12 @@ var coil = new mongoose.Schema({
             required: true,
         },
         mainid: {
-            type: String,
+            type: mongoose.Types.ObjectId,
             required: true,
+        },
+        chalan: {
+            type: Boolean,
+            default: false,
         }
     }]
 }, {

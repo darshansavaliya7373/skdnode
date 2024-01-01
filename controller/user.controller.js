@@ -3,6 +3,7 @@ var jwt = require("jsonwebtoken");
 var bcrypt = require("bcrypt");
 const coilModel = require("../model/coil.model");
 const userModel = require("../model/user.model");
+const chalanModel = require("../model/chalan.model");
 
 function empty(obj) {
     for (const key in obj) {
@@ -215,7 +216,7 @@ exports.deleteSingleCoil = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 };
-
+// full data of coil
 exports.operatorwithcoil = async (req, res) => {
 
     var data = await coilModel.find()
@@ -226,6 +227,33 @@ exports.operatorwithcoil = async (req, res) => {
     }
 
 }
+
+exports.chalan = async (req, res) => {
+
+    console.log(req.body);
+    if (empty(req.body)) {
+        return res.status(404).json({ message: "some field is empty" })
+    }
+    // const allCoilData = await coilModel.find({});
+    // const allDataArrays = allCoilData.map((coil) => coil.data);
+    // const flattenedDataArray = allDataArrays.flat();
+    // const filteredData = flattenedDataArray.filter(item =>req.body.coilstomakechalan.includes(item.id));
+    // console.log(filteredData);
+    var data = await chalanModel.create({ coilsid: req.body.coilstomakechalan })
+    if (data) {
+        for (const id of req.body.coilstomakechalan) {
+            var result = await coilModel.updateOne(
+                { "data._id": id },
+                { $set: { "data.$.chalan": true } }
+            )
+        }
+        return res.status(200).json({ message: "success chalan created " })
+    } else {
+        return res.status(400).json({ message: "error while creating chalan " });
+    }
+}
+
+// fiter of data
 exports.filterCoilData = async (req, res) => {
     try {
         const { mm, meter, weight, lessthanmeter, greaterthanmeter } = req.body;
