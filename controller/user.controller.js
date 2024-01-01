@@ -4,6 +4,7 @@ var bcrypt = require("bcrypt");
 const coilModel = require("../model/coil.model");
 const userModel = require("../model/user.model");
 const chalanModel = require("../model/chalan.model");
+const puppeteer = require('puppeteer');
 
 function empty(obj) {
     for (const key in obj) {
@@ -15,7 +16,6 @@ function empty(obj) {
     }
     return false;
 }
-
 // login user
 exports.login = async (req, res) => {
     var { number } = req.body;
@@ -277,9 +277,10 @@ exports.allchalans = async (req, res) => {
     }
 };
 
-
 exports.generateBill = async (req, res) => {
     try {
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage(); 
         const allCoilData = await coilModel.find({});
         const allDataArrays = allCoilData.map((coil) => coil.data);
         const flattenedDataArray = allDataArrays.flat();
@@ -378,11 +379,18 @@ exports.generateBill = async (req, res) => {
         </body>
         </html>
       `;
-
-        res.status(200).send(billHtml);
+     
+      await page.setContent(content);
+      const pdfBuffer = await page.pdf();
+  
+      await browser.close();
+  
+      res.contentType('application/pdf');
+      res.send(pdfBuffer);
+        // res.status(200).send(billHtml);
     } catch (error) {
         console.error('Error generating bill:', error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).json({message:'Internal Server Error'});
     }
     function groupCoils(coils) {
         const groupedCoils = [];
@@ -415,3 +423,4 @@ exports.generateBill = async (req, res) => {
         return coils.reduce((total, coil) => total + parseFloat(coil.meter), 0);
     }
 }
+  
