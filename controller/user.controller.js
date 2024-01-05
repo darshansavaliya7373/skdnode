@@ -5,6 +5,8 @@ const coilModel = require("../model/coil.model");
 const userModel = require("../model/user.model");
 const chalanModel = require("../model/chalan.model");
 const puppeteer = require('puppeteer');
+const mmModel = require("../model/mm.model");
+const ObjectId = require('mongoose').Types.ObjectId;
 
 function empty(obj) {
     for (const key in obj) {
@@ -58,19 +60,19 @@ exports.addcoil = async (req, res) => {
 // coil entry
 exports.coilenter = async (req, res) => {
     try {
-        console.log(req.body);
-        if (req.body.palateno === "") {
-            req.body.palateno = "null";
-        }
+        console.log(req.body,"coil enter");
         if (empty(req.body)) {
-
+            
             return res.status(404).json({ message: "some field is empty" });
-
+            
         } else {
+            if (req.body.palateno === "") {
+                req.body.palateno = "null";
+            }
             const allCoilData = await coilModel.find({});
             const allDataArrays = allCoilData.map((coil) => coil.data);
             const flattenedDataArray = allDataArrays.flat();
-            console.log(flattenedDataArray)
+            // console.log(flattenedDataArray)
             if (flattenedDataArray.length == 0) {
                 req.body.coilno = 1
             } else {
@@ -99,6 +101,9 @@ exports.singlecoilupdate = async (req, res) => {
     try {
         const coilIdToUpdate = req.params.id; // The _id of the element in the data array
         console.log(req.body, req.params);
+        if(req.body.palateno==""){
+            req.body.palateno="null"
+        }
         const data = await coilModel.findByIdAndUpdate(
             req.params.coil, // Use the main document _id here
             {
@@ -143,6 +148,7 @@ exports.todayaddcoil = async (req, res) => {
 exports.allcoil = async (req, res) => {
     try {
         const allCoilData = await coilModel.find({});
+        console.log(allCoilData.length);
         const allDataArrays = allCoilData.map((coil) => coil.data);
         const flattenedDataArray = allDataArrays.flat();
         res.status(200).json(flattenedDataArray);
@@ -174,7 +180,6 @@ exports.updatepalate = async (req, res) => {
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
-
 // all coil whose palate no is empty
 exports.emptypalateno = async (req, res) => {
     try {
@@ -247,9 +252,7 @@ exports.chalan = async (req, res) => {
         return res.status(400).json({ message: "error while creating chalan " });
     }
 }
-
-const ObjectId = require('mongoose').Types.ObjectId;
-
+// allchalans
 exports.allchalans = async (req, res) => {
     try {
         const allCoilData = await coilModel.find({});
@@ -276,7 +279,7 @@ exports.allchalans = async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 };
-
+// generate bill
 exports.generateBill = async (req, res) => {
     try {
         const browser = await puppeteer.launch();
@@ -422,5 +425,10 @@ exports.generateBill = async (req, res) => {
     function calculateTotalMeter(coils) {
         return coils.reduce((total, coil) => total + parseFloat(coil.meter), 0);
     }
+};
+exports.allmm = async(req,res)=>{
+
+    var data = await mmModel.find()
+    res.status(200).json(data);
+
 }
-  

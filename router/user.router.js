@@ -14,7 +14,8 @@ const{
     operatorwithcoil,
     chalan,
     allchalans,
-    generateBill
+    generateBill,
+    allmm,
 
 }=require('../controller/user.controller.js')
 
@@ -31,4 +32,5 @@ router.get('/operatorwithcoil',operatorwithcoil)
 router.post('/chalan',chalan)
 router.get('/allchalans',allchalans)
 router.get('/generateBill/:id',generateBill)
+router.get('/allmm',allmm)
 module.exports = router
