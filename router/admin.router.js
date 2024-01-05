@@ -7,6 +7,7 @@ const{
     home,
     loginpage,
     addmm,
+    adduser,
     // coilenter,
     // singlecoilupdate,
     // todayaddcoil,
@@ -25,6 +26,7 @@ router.post('/login',login)
 router.get('/login',loginpage)
 router.get('/',authentication,home);
 router.post('/addmm',authentication,addmm)
+router.post('/adduser',authentication,adduser)
 
 // router.get('/todayaddcoil',todayaddcoil)
 // router.post('/coilenter/:id',coilenter)

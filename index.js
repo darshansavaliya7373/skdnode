@@ -3,7 +3,6 @@ const app = express();
 const morgan = require("morgan");
 const path = require("path");
 const cookieParser = require("cookie-parser");
-const bodyParser = require("body-parser");
 const mongoose = require("./config/mongoose");
 const flash = require("express-flash");
 const session = require("express-session");
@@ -35,7 +34,7 @@ app.get("/", (req, res) => {
 });
 
 app.listen(3001, (err) => {
-  if (err) {
+  if (err) { 
     console.log(err);
   } else {
     console.log("Server is running on port 3001");

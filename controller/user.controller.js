@@ -1,6 +1,5 @@
 var admin = require("../model/user.model");
 var jwt = require("jsonwebtoken");
-var bcrypt = require("bcrypt");
 const coilModel = require("../model/coil.model");
 const userModel = require("../model/user.model");
 const chalanModel = require("../model/chalan.model");
@@ -427,8 +426,6 @@ exports.generateBill = async (req, res) => {
     }
 };
 exports.allmm = async(req,res)=>{
-
     var data = await mmModel.find()
     res.status(200).json(data);
-
 }

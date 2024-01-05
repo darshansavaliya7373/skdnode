@@ -33,4 +33,8 @@ router.post('/chalan',chalan)
 router.get('/allchalans',allchalans)
 router.get('/generateBill/:id',generateBill)
 router.get('/allmm',allmm)
+router.get('/profile',(req,res)=>{
+    res.json(req.user)
+})
+
 module.exports = router

@@ -1,27 +1,26 @@
-const Admin = require("../model/admin.model");
 const jwt = require("jsonwebtoken");
+const userModel = require("../model/user.model");
 
 const authentication = async (req, res, next) => {
   try {
-
-    if (req.cookies && req.cookies.token) {
-      const Token = req.cookies.token;
+    if (req.headers && req.headers.token) {
+      const Token = req.headers.token;
       const verifyAdmin = jwt.verify(Token, process.env.JWT_KEY);
       if (verifyAdmin === undefined) {
         req.flash("success", "unauthorized");
-        res.redirect("/admin/login"); 
+        return res.status(400).json({ message: "unauthorized token" });
       } else {
-        const adminData = await Admin.findById(verifyAdmin.id);
-        if (adminData === null) {
-          res.redirect("/admin/login");
+        const userData = await userModel.findById(verifyAdmin.id);
+        if (userData === null) {
+          return res.json({ message: "token data not found" });
         } else {
-          req.admin = adminData;
+          req.user = userData;
           req.token = Token;
           next();
         }
       }
     } else {
-      res.redirect("/admin/login");
+      return res.status(400).json({ message: "token not found" });
     }
   } catch (error) {
     console.log(error);

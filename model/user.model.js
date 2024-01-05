@@ -17,7 +17,12 @@ var user = new mongoose.Schema({
     password: {
         type: String,
         required: true,
+    },
+    authority:{
+        type: Array,
+        required: true,
     }
+
 }, {
     timestamps: true
 })
