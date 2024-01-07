@@ -40,8 +40,8 @@
         <h5 class="text-black fw-bold">mm list :-</h5>
         <div class="d-flex flex-wrap">
           <%for(var i of mm){%>
-            <button class="btn btn-primary mx-2" style="height: fit-content">
-              <%=i.mm%>
+            <button class="btn btn-primary mx-2 rounded-pill p-2" style="height: fit-content">
+              &nbsp;<%=i.mm%> MM&nbsp;&nbsp; <a href="/admin/deletemm/<%=i._id%>" style="padding: 3px 9px;" class="text-primary fw-bold rounded-circle text-decoration-none bg-white">X</a>
             </button>
             <%}%>
         </div>
@@ -78,6 +78,7 @@
               <input type="checkbox" <% if (i.authority.includes('edit')) { %>checked<% } %>> Edit
               <input type="checkbox" <% if (i.authority.includes('chalan')) { %>checked<% } %> > Chalan
              </div>
+             <a href="/admin/deleteuser/<%=i._id%>" class="btn-primary btn">delete</a>
             </div>
           <% } %>
           

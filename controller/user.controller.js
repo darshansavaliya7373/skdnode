@@ -281,8 +281,6 @@ exports.allchalans = async (req, res) => {
 // generate bill
 exports.generateBill = async (req, res) => {
     try {
-        const browser = await puppeteer.launch();
-        const page = await browser.newPage(); 
         const allCoilData = await coilModel.find({});
         const allDataArrays = allCoilData.map((coil) => coil.data);
         const flattenedDataArray = allDataArrays.flat();
@@ -381,15 +379,7 @@ exports.generateBill = async (req, res) => {
         </body>
         </html>
       `;
-     
-      await page.setContent(content);
-      const pdfBuffer = await page.pdf();
-  
-      await browser.close();
-  
-      res.contentType('application/pdf');
-      res.send(pdfBuffer);
-        // res.status(200).send(billHtml);
+      res.send(billHtml);
     } catch (error) {
         console.error('Error generating bill:', error);
         res.status(500).json({message:'Internal Server Error'});
@@ -425,6 +415,7 @@ exports.generateBill = async (req, res) => {
         return coils.reduce((total, coil) => total + parseFloat(coil.meter), 0);
     }
 };
+
 exports.allmm = async(req,res)=>{
     var data = await mmModel.find()
     res.status(200).json(data);

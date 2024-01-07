@@ -8,6 +8,8 @@ const{
     loginpage,
     addmm,
     adduser,
+    deleteuser,
+    deletemm,
     // coilenter,
     // singlecoilupdate,
     // todayaddcoil,
@@ -27,6 +29,8 @@ router.get('/login',loginpage)
 router.get('/',authentication,home);
 router.post('/addmm',authentication,addmm)
 router.post('/adduser',authentication,adduser)
+router.get('/deleteuser/:id',authentication,deleteuser);
+router.get('/deletemm/:id',authentication,deletemm);
 
 // router.get('/todayaddcoil',todayaddcoil)
 // router.post('/coilenter/:id',coilenter)

@@ -10,4 +10,4 @@ db.once('open',(err)=>{
         console.log("db connected");
     }
 
-})
+}) 

@@ -67,6 +67,37 @@ exports.loginpage = async (req, res) => {
   res.render("login");
 };
 
+exports.deletemm = async (req, res) => {
+  try {
+    var data = await mmModel.findByIdAndDelete(req.params.id)
+  if(data){
+    req.flash("success","data deleted successfully")
+    return res.redirect('back')
+  }else{
+    req.flash("success","data not deleted")
+    return res.redirect('back')
+  }
+  } catch (error) {
+   console.log(error);
+   res.redirect('back') 
+  }
+}
+exports.deleteuser = async (req, res) => {
+  try {
+    var data = await userModel.findByIdAndDelete(req.params.id)
+  if(data){
+    req.flash("success","data deleted successfully")
+    return res.redirect('back')
+  }else{
+    req.flash("success","data not deleted")
+    return res.redirect('back')
+  }
+  } catch (error) {
+   console.log(error);
+   res.redirect('back') 
+  }
+}
+
 // add mm form
 exports.addmm = async (req, res) => {
   console.log(req.body);
@@ -179,7 +210,7 @@ exports.generateBill = async (req, res) => {
         </style>
       </head>
       <body>
-        <h2>Bill - ${today.toISOString()}</h2>
+        <h2>Bill - ${today.toLocaleDateString()}</h2>
         <table>
           <thead>
             <tr>

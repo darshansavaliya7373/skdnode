@@ -22,7 +22,7 @@ const{
 
 router.post('/login',login)
 router.post('/addcoil',authentication,addcoil)
-router.get('/todayaddcoil',authentication,todayaddcoil)
+router.get('/todayaddcoil',todayaddcoil)
 router.post('/coilenter/:id',authentication,coilenter)
 router.post('/singlecoilupdate/:id/:coil',authentication,singlecoilupdate)
 router.get('/allcoil',authentication,allcoil)
@@ -31,11 +31,17 @@ router.get('/emptypalateno',authentication,emptypalateno)
 router.delete('/deletesinglecoil/:id',authentication,deleteSingleCoil)
 router.get('/operatorwithcoil',authentication,operatorwithcoil)
 router.post('/chalan',authentication,chalan)
-router.get('/allchalans',authentication,allchalans)
-router.get('/generateBill/:id',authentication,generateBill)
+router.get('/allchalans',allchalans)
+router.get('/generateBill/:id',generateBill)
 router.get('/allmm',authentication,allmm)
 router.get('/profile',authentication,(req,res)=>{
     res.json(req.user)
 })
+router.get('/logout',authentication,(req,rese)=>{
 
+    req.logOut();
+   res.clearCookie();
+   res.json({message:"logout successfully"})
+
+})
 module.exports = router
