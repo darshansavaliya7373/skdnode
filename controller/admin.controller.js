@@ -60,7 +60,7 @@ exports.home = async (req, res) => {
       coilsid: updatedCoilsid,
     };
   });
-  res.render("home", { mm, chalansWithCoilData,user });
+  res.render("home", { mm, chalansWithCoilData, user });
 };
 // login page 
 exports.loginpage = async (req, res) => {
@@ -70,31 +70,31 @@ exports.loginpage = async (req, res) => {
 exports.deletemm = async (req, res) => {
   try {
     var data = await mmModel.findByIdAndDelete(req.params.id)
-  if(data){
-    req.flash("success","data deleted successfully")
-    return res.redirect('back')
-  }else{
-    req.flash("success","data not deleted")
-    return res.redirect('back')
-  }
+    if (data) {
+      req.flash("success", "data deleted successfully")
+      return res.redirect('back')
+    } else {
+      req.flash("success", "data not deleted")
+      return res.redirect('back')
+    }
   } catch (error) {
-   console.log(error);
-   res.redirect('back') 
+    console.log(error);
+    res.redirect('back')
   }
 }
 exports.deleteuser = async (req, res) => {
   try {
     var data = await userModel.findByIdAndDelete(req.params.id)
-  if(data){
-    req.flash("success","data deleted successfully")
-    return res.redirect('back')
-  }else{
-    req.flash("success","data not deleted")
-    return res.redirect('back')
-  }
+    if (data) {
+      req.flash("success", "data deleted successfully")
+      return res.redirect('back')
+    } else {
+      req.flash("success", "data not deleted")
+      return res.redirect('back')
+    }
   } catch (error) {
-   console.log(error);
-   res.redirect('back') 
+    console.log(error);
+    res.redirect('back')
   }
 }
 
@@ -162,7 +162,7 @@ exports.generateBill = async (req, res) => {
     const today = new Date();
 
     const groupedCoils = groupCoils(chalan.coilsid);
-    console.log(groupedCoils,chalan.coilsid);
+    console.log(groupedCoils, chalan.coilsid);
     const totalMeter = calculateTotalMeter(flattenedDataArray);
     // console.log(flattenedDataArray);
     const totalCoils = flattenedDataArray.length;
@@ -202,15 +202,27 @@ exports.generateBill = async (req, res) => {
           background-color: #f2f2f2;
         }
       </style>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.debug.js"></script>
       <script>
-        function printFunction() { 
-          window.print(); 
-        }
+      var doc = new jsPDF(); 
+      var specialElementHandlers = { 
+          '#editor': function (element, renderer) { 
+              return true; 
+          } 
+      };
+      $('#submit').click(function () { 
+          doc.fromHTML($('#content').html(), 15, 15, { 
+              'width': 190, 
+                  'elementHandlers': specialElementHandlers 
+          }); 
+          doc.save('chalan.pdf'); 
+      });
       </script>
     </head>
-    <body>
+    <body id="content">
       <h2>Bill - ${today.toLocaleDateString()}</h2>
-      <table>
+      <table style="width:70%">
         <thead>
         <tr>
         <th colspan="4" style="text-align:center;font-weight:700"><span style="color:red">SKD</span> <span style="color:blue">COMPOSITE</span></th>
@@ -248,8 +260,49 @@ exports.generateBill = async (req, res) => {
           </tr>
         </tbody>
       </table>
-      <button onclick="printFunction()">Download</button>
-    </body>
+<br>
+<br>
+      <h2>Bill - ${new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'numeric', year: 'numeric' })}</h2>
+      <table style="width:70%">
+        <thead>
+        <tr>
+        <th colspan="4" style="text-align:center;font-weight:700"><span style="color:red">SKD</span> <span style="color:blue">COMPOSITE</span></th>
+        </tr>
+        <tr>
+        <th colspan="4" style="text-align:center;font-weight:700"><span style="color:black">Dispatch Details</span></th>
+        </tr>
+        <tr>
+        <td colspan="2" style="text-align:center;font-weight:700">Date: ${new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'numeric', year: 'numeric' })}</td>
+        <td  style="text-align:center;font-weight:700">Bill No :-</td>
+        <td></td>
+        </tr>
+          <tr>
+            <th>Coil No</th>
+            <th>Total Meter</th>
+            <th>Total Coil</th>
+            <th>Check</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${groupedCoils.map((group) => `
+            <tr>
+              <td>${simplifyCoilRange(group.coilRange)}</td>
+              <td>${calculateTotalMeter(group.coils)}</td> 
+              <td>${group.coils.length}</td>
+              <td></td>
+            </tr>
+          `).join('')}
+    
+          <tr>
+            <td>Total</td>
+            <td>${totalMeter}</td>
+            <td>${totalCoils}</td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+      <button id="submit">Download</button>
+      </body>
     </html>`
     // await page.setContent(billHtml);
     // const pdfBuffer = await page.pdf();
