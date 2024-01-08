@@ -2,7 +2,7 @@
 var express = require("express")
 var router = express.Router()
 var authentication = require('../middleware/user.middleware.js')
-const{
+const {
     login,
     addcoil,
     coilenter,
@@ -17,31 +17,28 @@ const{
     allchalans,
     generateBill,
     allmm,
-
-}=require('../controller/user.controller.js')
-
-router.post('/login',login)
-router.post('/addcoil',authentication,addcoil)
-router.get('/todayaddcoil',todayaddcoil)
-router.post('/coilenter/:id',authentication,coilenter)
-router.post('/singlecoilupdate/:id/:coil',authentication,singlecoilupdate)
-router.get('/allcoil',authentication,allcoil)
-router.post('/updatepalate',authentication,updatepalate)
-router.get('/emptypalateno',authentication,emptypalateno)
-router.delete('/deletesinglecoil/:id',authentication,deleteSingleCoil)
-router.get('/operatorwithcoil',authentication,operatorwithcoil)
-router.post('/chalan',authentication,chalan)
-router.get('/allchalans',authentication,allchalans)
-router.get('/generateBill/:id',authentication,generateBill)
-router.get('/allmm',authentication,allmm)
-router.get('/profile',authentication,(req,res)=>{
+} = require('../controller/user.controller.js')
+router.post('/login', login)
+router.post('/addcoil', authentication, addcoil)
+router.get('/todayaddcoil', todayaddcoil)
+router.post('/coilenter/:id', authentication, coilenter)
+router.post('/singlecoilupdate/:id/:coil', authentication, singlecoilupdate)
+router.get('/allcoil', authentication, allcoil)
+router.post('/updatepalate', authentication, updatepalate)
+router.get('/emptypalateno', authentication, emptypalateno)
+router.delete('/deletesinglecoil/:id', authentication, deleteSingleCoil)
+router.get('/operatorwithcoil', authentication, operatorwithcoil)
+router.post('/chalan', authentication, chalan)
+router.get('/allchalans', authentication, allchalans)
+router.get('/generateBill/:id', authentication, generateBill)
+router.get('/allmm', authentication, allmm)
+router.get('/profile', authentication, (req, res) => {
     res.json(req.user)
 })
-router.get('/logout',authentication,(req,rese)=>{
-
+router.get('/logout', authentication, (req, rese) => {
     req.logOut();
-   res.clearCookie();
-   res.json({message:"logout successfully"})
+    res.clearCookie();
+    res.json({ message: "logout successfully" })
 
 })
 module.exports = router

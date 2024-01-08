@@ -349,18 +349,37 @@ exports.generateBill = async (req, res) => {
               background-color: #f2f2f2;
             }
           </style>
+          <script>
+          function printFunction() { 
+            window.print(); 
+          }
+        </script>
+        <style>
+  /* Your existing styles here */
+
+  @media print {
+    /* Styles for print media */
+    button {
+      display: none;
+    }
+  }
+</style>
+
         </head>
         <body>
           <h2>Bill - ${today.toISOString()}</h2>
           <table>
             <thead>
-              <tr>
-                <th>Coil No</th>
-                <th>Meter</th>
-                <th>Total Coil</th>
-              </tr>
+            <tr>
+            <th>Coil No</th>
+            <th>Meter</th>
+            <th>Total Coil</th>
+            </tr>
             </thead>
             <tbody>
+            <tr>
+            <td>SKD COMPOSITE</td>
+            </tr>
               ${groupedCoils.map((group) => `
                 <tr>
                   <td>${simplifyCoilRange(group.coilRange)}</td>
@@ -368,7 +387,6 @@ exports.generateBill = async (req, res) => {
                   <td>${group.coils.length}</td>
                 </tr>
               `).join('')}
-
               <tr>
               <td>Total</td>
               <td>${totalMeter}</td>
@@ -376,6 +394,7 @@ exports.generateBill = async (req, res) => {
             </tr>
             </tbody>
           </table>
+          <button onclick="printFunction()">Download</button>
         </body>
         </html>
       `;

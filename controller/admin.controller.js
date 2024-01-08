@@ -136,10 +136,6 @@ exports.adduser = async (req, res) => {
 
 exports.generateBill = async (req, res) => {
   try {
-    // const browser = await puppeteer.launch();
-    const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
-
-    const page = await browser.newPage();
     const allCoilData = await coilModel.find({});
     const allDataArrays = allCoilData.map((coil) => coil.data);
     const flattenedDataArray = allDataArrays.flat();
@@ -166,86 +162,102 @@ exports.generateBill = async (req, res) => {
     const today = new Date();
 
     const groupedCoils = groupCoils(chalan.coilsid);
+    console.log(groupedCoils,chalan.coilsid);
     const totalMeter = calculateTotalMeter(flattenedDataArray);
+    // console.log(flattenedDataArray);
     const totalCoils = flattenedDataArray.length;
+
     function simplifyCoilRange(coilRange) {
       const coils = coilRange.split(' to ').map(Number);
-
       if (coils.length < 2) {
         return coilRange; // Not a valid range
       }
-
       const sortedCoils = [...coils].sort((a, b) => a - b);
       const minCoil = sortedCoils[0];
       const maxCoil = sortedCoils[sortedCoils.length - 1];
-
       return minCoil === maxCoil ? minCoil.toString() : `${minCoil} to ${maxCoil}`;
     }
-
     // Example usage:
     const simplifiedRange = simplifyCoilRange('313 to 314 to 315 to 316');
-    console.log(simplifiedRange); // Output: "4 to 16"
+    // console.log(simplifiedRange); // Output: "4 to 16"
 
-    const billHtml = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Bill</title>
-        <style>
-          table {
-            font-family: Arial, sans-serif;
-            border-collapse: collapse;
-            width: 100%;
-          }
-
-          th, td {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
-          }
-
-          tr:nth-child(even) {
-            background-color: #f2f2f2;
-          }
-        </style>
-      </head>
-      <body>
-        <h2>Bill - ${today.toLocaleDateString()}</h2>
-        <table>
-          <thead>
+    const billHtml = `<!DOCTYPE html>
+    <html>
+    <head>
+      <title>Bill</title>
+      <style>
+        table {
+          font-family: Arial, sans-serif;
+          border-collapse: collapse;
+          width: 100%;
+        }
+    
+        th, td {
+          border: 1px solid #dddddd;
+          text-align: left;
+          padding: 8px;
+        }
+    
+        tr:nth-child(even) {
+          background-color: #f2f2f2;
+        }
+      </style>
+      <script>
+        function printFunction() { 
+          window.print(); 
+        }
+      </script>
+    </head>
+    <body>
+      <h2>Bill - ${today.toLocaleDateString()}</h2>
+      <table>
+        <thead>
+        <tr>
+        <th colspan="4" style="text-align:center;font-weight:700"><span style="color:red">SKD</span> <span style="color:blue">COMPOSITE</span></th>
+        </tr>
+        <tr>
+        <th colspan="4" style="text-align:center;font-weight:700"><span style="color:black">Dispatch Details</span></th>
+        </tr>
+        <tr>
+        <td colspan="2" style="text-align:center;font-weight:700">Date: ${new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'numeric', year: 'numeric' })}</td>
+        <td  style="text-align:center;font-weight:700">Bill No :-</td>
+        <td></td>
+        </tr>
+          <tr>
+            <th>Coil No</th>
+            <th>Total Meter</th>
+            <th>Total Coil</th>
+            <th>Check</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${groupedCoils.map((group) => `
             <tr>
-              <th>Coil No</th>
-              <th>Meter</th>
-              <th>Total Coil</th>
+              <td>${simplifyCoilRange(group.coilRange)}</td>
+              <td>${calculateTotalMeter(group.coils)}</td> 
+              <td>${group.coils.length}</td>
+              <td></td>
             </tr>
-          </thead>
-          <tbody>
-            ${groupedCoils.map((group) => `
-              <tr>
-                <td>${simplifyCoilRange(group.coilRange)}</td>
-                <td>${calculateTotalMeter(group.coils)}</td> 
-                <td>${group.coils.length}</td>
-              </tr>
-            `).join('')}
-
-            <tr>
+          `).join('')}
+    
+          <tr>
             <td>Total</td>
             <td>${totalMeter}</td>
             <td>${totalCoils}</td>
+            <td></td>
           </tr>
-          </tbody>
-        </table>
-      </body>
-      </html>
-    `;
+        </tbody>
+      </table>
+      <button onclick="printFunction()">Download</button>
+    </body>
+    </html>`
+    // await page.setContent(billHtml);
+    // const pdfBuffer = await page.pdf();
 
-    await page.setContent(billHtml);
-    const pdfBuffer = await page.pdf();
+    // await browser.close();
 
-    await browser.close();
-
-    res.contentType('application/pdf');
-    res.send(pdfBuffer);
+    // res.contentType('application/pdf');
+    res.send(billHtml);
     // res.status(200).send(billHtml);
   } catch (error) {
     console.error('Error generating bill:', error);
